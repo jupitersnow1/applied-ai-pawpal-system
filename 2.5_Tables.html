@@ -1,0 +1,363 @@
+<!----- Tables ----->
+
+<!--    Table is an HTML structure created with the <table> element that organizes data into rows and columns -->
+
+<!-- * <tr>  element creates a table row, which contains all the row's cells -->
+<!-- * <th> element creates a table cell containing table header information about the data. Usually, the browserdisplays table headers centered with a bold font-->
+<!-- * <td> element creates a table cell containing table data -->
+
+<!-- A table caption defines a short descriptve text for a table and is created with the <caption> element. The catopn element must immediately follow the opening <table> tag. A web browser typically renders the table catipn centered above the table-->
+
+<!---Example: -->
+<table>
+  <caption>
+    Presidential Nominees
+  </caption>
+  <tr>
+    <th>Party</th>
+    <!--table header -->
+    <th>Nominee</th>
+  </tr>
+
+  <tr>
+    <!--table row (tr)-->
+    <td>Democratic</td>
+    <!--table cell containing `table data`, essentially a `cell` (td)-->
+    <td>Franklin Pierce</td>
+  </tr>
+  <!--table row (tr)-->
+
+  <tr>
+    <td>Whig</td>
+    <td>Winfield Scott</td>
+  </tr>
+</table>
+
+<!--without CSS, the table renders with no border around the table cells. -->
+
+<!--Table Borders------------------------------->
+
+<!--CSS can be added toa webpage to display table borders -->
+<!--Example: -->
+<style>
+  table,
+  th,
+  td {
+    border: 2px solid gray;
+  }
+</style>
+
+<!---Another example: -->
+
+<!--- Add tbale row ---->
+<br /><br />
+<table>
+  <caption>
+    State Weather Extremes
+  </caption>
+  <tr>
+    <th></th>
+    <th>Lowest</th>
+    <!-- notice how these heading are in the left handside of the table! -->
+    <th>Highest</th>
+  </tr>
+
+  <tr>
+    <th>Average Rainfall</th>
+    <td>Nevada</td>
+    <td>Hawaii</td>
+  </tr>
+
+  <tr>
+    <th>Average Temperature</th>
+    <td>Alaska</td>
+    <td>Florida</td>
+  </tr>
+</table>
+
+<!--The scope attribute is commonly assigned "col" or "row" to indicate if the table header applies to a column or row of data. for Example: 
+-->
+
+<!--- Add tbale column ---->
+<br /><br />
+
+<table>
+  <caption>
+    Weight Extremes
+  </caption>
+  <tr>
+    <th></th>
+    <th>Lightest</th>
+    <th>Heaviest</th>
+  </tr>
+  <tr>
+    <th>Bird</th>
+    <td>Bee Hummingbird</td>
+    <td>Ostrich</td>
+  </tr>
+  <tr>
+    <th>Mammal</th>
+    <td>Pygmy Shrew</td>
+    <td>Blue Whale</td>
+  </tr>
+</table>
+
+<!--accessible tables -------->
+<br /><br />
+<table>
+  <caption>
+    Weight Extremes
+  </caption>
+  <tr>
+    <th></th>
+    <th scope="col">Lightest</th>
+    <th scope="col">Heaviest</th>
+  </tr>
+
+  <tr>
+    <th scope="row">Bird</th>
+    <td>Bee Hummingbird</td>
+    <td>Ostrich</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Mammal</th>
+    <td>Pygmy Shrew</td>
+    <td>Blue Whale</td>
+  </tr>
+</table>
+
+<!---- Spanning multiple columns and rows ------>
+<!--A single table cell occupies a single row and column by dfault, but a cell may span multiple columns or mutple rows using the colspan attribure and rowspan attribute to specify how many columns or wos to span. The colspan and rowspan attributes apply to <td> and <th> elements. -->
+
+<!-- Example: 
+ The following HTML creates a table with a "Warmup" cell that spans 3 columns and a "Scrimmage" cell that spans 2 rows. Add HTML and text to create a "Sat" column and "12:00" row containg cells spannign multiple rows or columns as shown in th ewxpected webapge-->
+
+<br /><br />
+<table>
+  <caption>
+    Team Schedule
+  </caption>
+  <tr>
+    <th></th>
+    <th>Mon</th>
+    <th>Wed</th>
+    <th>Fri</th>
+  </tr>
+
+  <tr>
+    <th>9:00</th>
+    <td colspan="3">Warmup</td>
+  </tr>
+
+  <tr>
+    <th>10:00</th>
+    <td>Drills</td>
+    <td>Skills Test</td>
+    <td rowspan="2">Scrimmage</td>
+  </tr>
+
+  <tr>
+    <th>11:00</th>
+    <td>Film</td>
+    <td>Weights</td>
+  </tr>
+</table>
+
+<!---Another example of a table using row and colspan -->
+
+<br /><br />
+
+<table>
+  <caption>
+    Team Schedule
+  </caption>
+  <tr>
+    <th></th>
+    <th>Mon</th>
+    <th>Wed</th>
+    <th>Fri</th>
+    <th>Sat</th>
+  </tr>
+  <tr>
+    <th>9:00</th>
+    <td colspan="3">Warmup</td>
+    <td rowspan="3">Games</td>
+  </tr>
+  <tr>
+    <th>10:00</th>
+    <td>Drills</td>
+    <td>Skills Test</td>
+    <td rowspan="2">Scrimmage</td>
+  </tr>
+  <tr>
+    <th>11:00</th>
+    <td>Film</td>
+    <td>Weights</td>
+  </tr>
+  <tr>
+    <th>12:00</th>
+    <td colspan="2"></td>
+    <td colspan="2">Team Lunch</td>
+  </tr>
+</table>
+
+<!--2.5.1 Modifying a table -->
+<!-- 2. Create a nother column for "Sam" on the right most side of the table, with Project 1 score of "82" and Project 2 score "95"-->
+
+<br />
+<br />
+
+<table>
+  <caption>
+    Project scores
+  </caption>
+
+  <!-- Update the following code snippet with your solution -->
+  <tr>
+    <th></th>
+    <th>Tim</th>
+    <th>Sam</th>
+  </tr>
+  <tr>
+    <th>Project 1</th>
+    <td>80</td>
+    <td>82</td>
+  </tr>
+  <tr>
+    <th>Project 2</th>
+    <td>100</td>
+    <td>95</td>
+  </tr>
+</table>
+
+<br /><br />
+<!--- 3. Create another row for "Ann" as the second row of the table, with a grade of "B"
+ note: the header row is the first row of the table-->
+
+<table>
+  <caption>
+    Course grades
+  </caption>
+  <tr>
+    <th>Student</th>
+    <th>Grade</th>
+  </tr>
+
+  <!-- Update the following code snippet with your solution -->
+  <tr>
+    <td>Bob</td>
+    <td>B+</td>
+  </tr>
+
+  <tr>
+    <td>Ann</td>
+    <td>B</td>
+  </tr>
+
+  <tr>
+    <td>Jan</td>
+    <td>A</td>
+  </tr>
+  <tr>
+    <td>Sam</td>
+    <td>A-</td>
+  </tr>
+</table>
+
+<!--- 4. Create a "Group"column on the left-most side of the table, containing groups "A" and "B", respectively. Group "B" should span 2 rows. -->
+<br /><br />
+<table>
+  <caption>
+    Gradebook
+  </caption>
+
+  <!-- Update the following code snippet with your solution -->
+  <tr>
+    <th>Group</th>
+    <th>Student</th>
+    <th>Quiz 1</th>
+    <th>Project 1</th>
+    <th>Homework 1</th>
+    <th>Midterm</th>
+  </tr>
+  <tr>
+    <td rowspan="1">A</td>
+    <td>Ann</td>
+    <td>91</td>
+    <td>80</td>
+    <td>98</td>
+    <td>75</td>
+  </tr>
+  <tr>
+    <td rowspan="2">B</td>
+    <td>Jim</td>
+    <td>86</td>
+    <td>77</td>
+    <td>81</td>
+    <td>89</td>
+  </tr>
+  <tr>
+    <td>Pam</td>
+    <td>79</td>
+    <td>82</td>
+    <td>72</td>
+    <td>84</td>
+  </tr>
+</table>
+
+<br /><br />
+<!-- 5. Make Patty's "Excused" value spanthe "Tuesday and "Wednesday" columns. Make Schroeder's "Present" value span all three columns -->
+
+<table>
+  <caption>
+    Attendance
+  </caption>
+
+  <!-- Update the following code snippet with your solution -->
+  <tr>
+    <th>Student</th>
+    <th>Monday</th>
+    <th>Tuesday</th>
+    <th>Wednesday</th>
+  </tr>
+  <tr>
+    <td>Patty</td>
+    <td>Present</td>
+    <td>Excused</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>Schroeder</td>
+    <td>Present</td>
+    <td>Present</td>
+    <td>N/A</td>
+  </tr>
+</table>
+
+<br /><br />
+<!-- updated version -->
+
+<table>
+  <caption>
+    Attendance
+  </caption>
+
+  <!-- Update the following code snippet with your solution -->
+  <tr>
+    <th>Student</th>
+    <th>Monday</th>
+    <th>Tuesday</th>
+    <th>Wednesday</th>
+  </tr>
+  <tr>
+    <td>Patty</td>
+    <td>Present</td>
+    <td colspan="2">Excused</td>
+    <!-- <td>N/A</td> -->
+  </tr>
+  <tr>
+    <td>Schroeder</td>
+    <td colspan="3">Present</td>
+  </tr>
+</table>
