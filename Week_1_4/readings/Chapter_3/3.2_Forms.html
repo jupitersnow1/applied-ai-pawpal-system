@@ -1,0 +1,277 @@
+<!--
+3.2 Forms
+<form> element
+The <form> element allows the web browser to submit information from the user to the server. The <form> element has two primary attributes:
+
+1. The `action attribute` indicates the URL where the form data should be sent. Typically the URL uses HTTPS so the form data is encrypted.
+
+2. The `method attribute` indicates the HTTP request type the browser will use to communicate with the server. The method is either GET or POST. GET is the default method if no method is specified.
+-->
+
+
+
+<!-- 3.2.1 Submitting form data to a server -->
+<form action="https://example.com/apply" method="POST">
+    <!--The <form> tag specifies that form data should be posted to example.com.-->
+    <p>
+        <label for="first">First Name:</label> <!--The <label> tag provides a label for the input first name field.-->
+        <input type="text" name="first" id="first">
+    </p>
+    <p>
+        <label for="last">Last Name:</label> <!--The <label> tag provides a label for the input last name field.-->
+        <input type="text" name="last" id="last">
+    </p>
+    <input type="submit">
+</form>
+
+<!--Refer to the HTML below.
+
+<form action="https://google.com/">
+</form>
+
+1. To which server will the browser send the form data?
++ google.com
+
+
+2. Which method will the browser use to communicate with the server?
++ GET
+
+Explanation:
+When the method attribute is not set or invalid, the browser 
+by default uses an HTTP GET request to communicate with the server.
+
+-->
+
+<br><br>
+
+<!-- * GET method is a technique used by a web browser to submit information to a web server by altering the URL of the HTTP request. 
+
+When a user clicks the submit button in a form that uses the GET method, the browser performs the following steps:
+
+1. Collect all data from the form fields into a query string. 
+The query string is a set of name=value pairs separated by
+the ampersand character (&). Each name is specified as an 
+attribute of the HTML field, and the value is the user-entered data. 
+
+Ex: first=Rick&last=Deckard
+
+2. Create a URL with the server page and name=value pairs. The URL 
+is composed of the action attribute specified in the form, the 
+question mark character (?), and the query string. 
+
+Ex: 
+a.) http://example.com/apply?
+b.) first=Rick&last=Deckard
+c.) http://example.com/apply?first=Rick&last=Deckard
+
+3. Use the newly created URL to create and send an HTTP GET request.
+Ex: GET request http://example.com/apply?first=Rick&last=Deckard
+
+4. Display or update the webpage using the HTTP response received from the server.
+-->
+
+
+<!--3.2.4: GET method.
+Refer to the form below.
+
+-->
+<form method="GET" action="http://example.org/">
+    <input type="text" name="item">
+    <input type="text" name="price">
+    <input type="submit">
+</form>
+
+<!--
+
+1. What is the query string if the user submits "bananas" and "2.50" in the text boxes?
+    + item=bananas&price=2.50
+2. What is the URL the browser uses to send the form data?/What URL does the browser request if the user submits "bananas" and "2.50" in the text boxes?
+    + http://example.org/?item=bananas&price=2.50
+
+-->
+
+
+<br><br>
+
+<!-- * POST method is a technique used by a web browser to submit information to a web server by sending the information in the HTTP request body.  
+
+When the user clicks the submit button in a form that uses the POST method, the browser performs the following:
+
+1. Create an HTTP POST request using the URL from the form's action attribute.
+2. Create a query string from the form data. Ex: first=Sarah&last=Connor
+3. Place the query string in the HTTP request message body, and send the request.
+4. Display or update the webpage using the HTTP response received from the server.
+
+
+If a form field contains binary data such as an image, the normal format of the query 
+string is not sufficient to encode the binary data. To accommodate binary data, a POST 
+request can be split into multiple parts
+
+* <form> element's enctype attribute value "multipart/form-data" indicates the web browser 
+should split a POST request into multiple parts, where each input field is sent as a separate 
+part of the HTTP request message.
+
+-->
+
+<!--3.2.5: Using the POST method to submit form data to a server.-->
+
+<!-- 1. The browser collects the form data into multiple parts and adds each part to the POST request.-->
+
+<body>
+    <form action="https://example.com/apply" method="POST" enctype="multipart/form-data">
+        <p>
+            <label for="first">First Name:</label>
+            <input type="text" name="first" id="first">
+        </p>
+        <p>
+            <label for="last">Last Name:</label>
+            <input type="text" name="last" id="last">
+        </p>
+        <p>
+            <label for="pic">Upload picture:</label>
+            <input type="file" name="pic" id="pic">
+        </p>
+        <input type="submit">
+    </form>
+</body>
+
+<!--2. The POST request is then sent to the server -->
+
+
+
+<br><br>
+<!-- 3.2.6: POST method.
+Refer to the form below.
+-->
+
+<form method="POST" action="http://example.org/">
+    <input type="text" name="item">
+    <input type="text" name="price">
+    <input type="submit">
+</form>
+
+<!--
+1. What is the query string if the user submits
+"oranges" and "1.99" in the text boxes?
+
++ item=oranges&price=1.99
+
+2. What URL does the browser request if the user submits 
+"oranges" and "1.99" in the text boxes?
+
++ http://example.org/
+
+3. What changes about the form data when 
+enctype="multipart/form-data" is added to the <form> tag?
+
++ Each name/value pair is separated into multiple parts.
+
+
+-->
+
+<!--Escaping form data
+The &, ?, and = characters have special meaning in a query string. 
+If a user enters characters like &, ?, =, or white space characters like space,
+newline, or tab, the characters must be escaped, meaning the characters must be 
+transformed into other representations. The browser rules for escaping form data 
+are as follows:
+
+* Space → +
+* All other reserved characters, newline, and tab → %XX where XX is the ASCII hex value of the character
+
+Ex: If "1 + 2 = ?" is entered into a textbox, the browser escapes the values producing "1+%2B+2+%3D+%3F". 2B is the ASCII hex value for "+", 3D is the ASCII value for "=", and 3F is the ASCII value for "?".
+
+The web server unescapes the form data to determine what the original values are.
+-->
+
+
+<!---
+
+Form widgets
+A widget is an interactive component (usually graphical) that the browser uses to interact with a user. Ex: Buttons, drop-down menus, and data entry fields.
+
+The <input> element creates a widget for receiving user input. The <input> element is a void element with five primary attributes:
+
+The `type attribute` indicates the widget type. Common types include text, password, submit, and button.
+The `name attribute` names the widget and sends the widget's value when the widget's form is submitted.
+The `id attribute` is used to give a widget a unique identifier.
+The `placeholder attribute` specifies text that first appears in a text widget, typically for giving the user a hint as to the expected value.
+The `value attribute` specifies a default value for a widget.
+
+A text box widget is an <input> element with the type attribute of "text" that allows users to enter a single line of text.
+
+The web browser displays a `submit button` widget for an <input> tag with the type attribute 
+of "submit", which sends the associated form's data to the server when clicked. A submit button 
+uses the value attribute to specify the button's text.
+
+The HTML below asks for a message to tweet. The text box widget does not use the value 
+attribute because no default tweet message makes sense. The submit button does not use 
+the name attribute because the submit button's value is not needed by the web server.
+
+-->
+
+<br><br>
+<!--Figure 3.2.2: Complete HTML form sending status to Twitter using a secure HTTP POST request.
+-->
+
+<form action="https://twitter.com/status" method="POST">
+    <input type="text" name="status" id="status" placeholder="Your status">
+    <input type="submit" value="Send status">
+</form>
+
+
+<br><br>
+<!--Labels and text areas
+The <label> element displays descriptive text associated with a specific widget. A label has a for attribute whose value should match the id attribute for the widget being labeled. Labels help people using screen readers understand what input is expected.
+
+Figure 3.2.3: HTML for a label associated with a text box widget.
+-->
+<label for="username">Username:</label>
+<input type="text" id="username">
+
+<!-- A text area widget allows users to enter multiple lines of text and is created with the <textarea> element. 
+A <textarea> element has optional rows and cols attributes to specify the initial size of the text area. -->
+
+
+<br><br>
+<!-- Figure 3.2.4: HTML for a textarea -->
+<textarea name="summary" rows="4" cols="50">To summarize...</textarea>
+
+
+<br><br>
+<!--3.2.8: Text inputs -->
+
+<!--
+The following HTML form contains a text box, text area, and submit button. Pressing the submit button submits the form data to form-viewer.php, which displays the submitted form data.
+
+Add another text box with a "last" name. Also change the size of the text area so that the text area has 7 rows and 50 columns of text. Make your webpage match the expected webpage.
+
+Type some data into the form and press Submit. Note that the form data appears in the query string of the resulting webpage because the form uses the GET method.
+
+Change the form's method from "GET" to "POST". Render the webpage, type some data into the form, and press Submit. The form data no longer appears in the query string of the resulting webpage although the submitted data is present.
+-->
+
+<form action="https://wp.zybooks.com/form-viewer.php" target="_blank" method="GET">
+    <p>
+        <label for="first">First name:</label>
+        <input type="text" id="first" name="first" placeholder="Text box">
+    </p>
+
+    <p>
+        <label for="last">Last name:</label>
+        <input type="text" id="last" name="last" placeholder="Text box">
+    </p>
+
+    <p>
+        <label for="address">Address:</label>
+        <textarea id="address" name="address" rows="7" cols="50" placeholder="Text area with 7 rows and 50 cols"
+            rows="2" cols="20"></textarea>
+    </p>
+
+    <p>
+        <input type="submit" value="Submit">
+    </p>
+</form>
+
+<br><br>
+<!-- 3.2.1: Building forms -->
