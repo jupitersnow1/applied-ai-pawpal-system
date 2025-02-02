@@ -1,0 +1,20 @@
+iterative waterfall sdlc model,
+
+you have to make the estimates upfront like 
+this sw is going to cost you this and wont be ready 
+until 2 yrs. 
+
+UML 
+if both the designer and client know the model??
+
+
+
+
+
+SRS or CRC  
+
+
+> XP Models
+- unit test
+- integration testing 
+

@@ -1,0 +1,167 @@
+<!----- 3.1 HTML Containers ----->
+
+<!----- Containers and parent containers ----->
+
+<!----- 
+A **container** is any element in a web document that has opening 
+and clising tags. The content between the tags is the child of the container.
+
+A **parent container** is a container in which another element resides. 
+
+
+Common HTML containers
+- header : container for introductory content 
+- footer : container for content descriptive information about the webpage like author, copyright, or date modified
+- address: container for persons or organization's contact information 
+- main : container for the documents primary content 
+- section: container for distics parts of a document such as a chapeter 
+- article: Container for self-contained content that can be reused independently, eg as a news article. 
+- nav: container for content relating to website navigation 
+- div: generic element for creating block containers 
+- span: generic element for creating inline containers
+
+----->
+
+<!----- 3.1.1 Containers and parent containers : ----->
+<body> 
+    <p>The top-selling board 
+        games of all time are: 
+    </p>
+
+    <ol>
+        <li>Chess</li>
+        <li>Checkers</li>
+        <li>Backgammon</li>
+        <li>Scrabble</li>
+        <li>Monopoly</li>
+        <li>Clue</li>
+    </ol>
+</body>
+
+
+<br><br>
+<!----- 3.1.2 Parent containers : ----->
+
+<section> 
+    <ol>
+        <li><img src = "George-Washington.jpg" alt = "George Washingtonn"</li>
+
+        <li><img src = "John-Adams.jpg" alt = "John Adams"</li>
+
+        <li><img src = "Thomas-Jefferson.jpg" alt = "Thomas Jefferson"</li>
+    </ol>
+</section>
+
+<br><br>
+
+<!----- 3.1.3 Container Structure : ----->
+<body> 
+    <header>
+        <h1>The White House</h1>
+    </header>
+
+    <main>
+        <p>
+            The White House is the official residence of the President of 
+        the United States.
+        </p>
+
+        <img src = "WhiteHouse.jpg" alt = "The White House">
+        <address>
+            1600 Pennsylvania Avenue NW <br>
+            Washington, DC 20500
+        </address>
+    </main>
+
+    <footer>
+
+        site by  <a href = "mailto:solutions@example.com">Website Solutions</a>
+        <!-- <p>
+            &copy; 2020 The White House
+        </p> -->
+    </footer>
+</body>
+
+<!----- BLOCK ELEMENTS: ----->
+<!----- HTML elements can be categorized as either inline or block. 
+
+- Block elements (aka block-level elements) fills the width of the elements parent container and can contain other block elements. 
+example:
+<ol> element is a block element, and each ordered list start on a new line separate from previous and following blcoks. 
+
+Unline other blcok elements, such as <p> and <table>, <div> is the only blcok element with no semantic meaning, or implied purpose. 
+
+- Inline elements (aka inline-level elements) are covered in the next section. 
+----->
+
+<!----- 3.1.1 Block elements with visible containers  ----->
+
+<!----- The following htnl breaks up a doc into logical components using a <div> element for eahc components. 
+    The corresponding image displays the border for each container. ----->
+
+<br><br>
+<body>
+    <div>Logo and headline elements</div>
+    <div>Navigation elements</div>
+    <div>Main content</div>
+    <div>Footer and legal</div>
+</body>
+
+<!--- The width of a block container is determined by the width of the parent contaier-->
+
+
+
+<!--INLINE ELEMENTS: -->
+<!--
+Inline element fills the minimum space possible in the element;s parent container and can only contain text or other inline elements. 
+Example:
+The <a> element is an inline element that creates a hyperlink container as big as the link's internal content.
+    a hyperlink does not fill the width or height of the link's parent paragraph. 
+
+<span> element
+    is a generic inline elemnt. unlike other inline elements, such as <a> and <em>, the <span> element has no semantic meaning. 
+    The <span> element is used to apply styles to a specific section of text.
+
+
+<Since <div> and <span> do not have semantic meaning, <div> and <span> are used primarily for presentation and interaction purposes. 
+    Good practice is to use elements like
+    <address>  and <article> that convey semantic meaning when creatign containers, and use <div> and <span> only when no other elements are appropritate. 
+-->
+
+
+
+<!----- 3.1.2 Span elements with visible containers  ----->
+
+<br><br>
+<p>
+    <span>Now we are engaged in a great civil war testing whether that 
+    nation, or any nation so conceived and so dedicated, can long
+    endure.</span>
+    <span>We are met on a great battle-field of that war.</span>
+    <span>We have come to dedicate a portion of that field, as a final
+    resting place for those who here gave their lives that that nation might
+    live.</span>
+    <span>It is altogether fitting and proper that we should do this.</span>
+ </p>
+
+<!--- <p> : block, the <p> element is a block element that fills the width of the parent container.
+    <img>: inline, the <img> elements width is determined by the elements content and may not extend to the width of the <a> parent container. 
+    <a>: inline 
+    <br>: inline, the <br> element does not hold any other content and does not have a width 
+    
+    
+What types of elements can be inside a block element?
+- Both inline and block elements
+
+What types of elements can be inside an inline element?
+- Only inline elements
+-->
+
+<!--practice 2-->
+<nav>
+    <a href = "home.html">Home</a>
+    <a href = "catalog.html">catalog</a>
+    <a href = "help.html">Help</a>
+</nav>
+
+<!--practice 3-->
