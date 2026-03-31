@@ -74,23 +74,33 @@ class Pet:
     
     def add_task(self, task: Task) -> None:
         """Add a task to this pet's task list."""
-        pass
+        self.tasks.append(task)
     
     def remove_task(self, task_id: str) -> bool:
         """Remove a task by ID. Returns True if successful."""
-        pass
+        for i, t in enumerate(self.tasks):
+            if t.id == task_id:
+                self.tasks.pop(i)
+                return True
+        return False
     
     def edit_task(self, task_id: str, **updates) -> bool:
         """Edit a task's attributes. Returns True if successful."""
-        pass
+        for t in self.tasks:
+            if t.id == task_id:
+                for k, v in updates.items():
+                    if hasattr(t, k):
+                        setattr(t, k, v)
+                return True
+        return False
     
     def get_pending_tasks(self) -> List[Task]:
         """Return all incomplete tasks for this pet."""
-        pass
+        return [t for t in self.tasks if not t.is_complete]
     
     def get_tasks_by_priority(self) -> List[Task]:
         """Return tasks sorted by priority (highest first)."""
-        pass
+        return sorted(self.get_pending_tasks(), key=lambda t: PRIORITY_LEVELS.get(t.priority, 1), reverse=True)
 
 
 @dataclass

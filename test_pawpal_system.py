@@ -1,5 +1,5 @@
 import pytest
-from pawpal_system import Task
+from pawpal_system import Task, Pet
 
 
 def test_task_methods():
@@ -95,6 +95,73 @@ def test_task_frequency_validation():
     with pytest.raises(ValueError, match="frequency must be one of"):
         Task(id="fi", description="Feed invalid", duration_min=15, priority="high", frequency="monthly")
 
+def test_pet_add_task():
+    pet = Pet(id="p1", name="Mochi", species="cat", age=3)
+    t1 = Task(id="t1", description="Feed", duration_min=15, priority="high")
+    
+    pet.add_task(t1)
+    assert len(pet.tasks) == 1
+    assert pet.tasks[0].id == "t1"
+
+
+def test_pet_remove_task():
+    pet = Pet(id="p1", name="Mochi", species="cat", age=3)
+    t1 = Task(id="t1", description="Feed", duration_min=15, priority="high")
+    t2 = Task(id="t2", description="Play", duration_min=30, priority="medium")
+    
+    pet.add_task(t1)
+    pet.add_task(t2)
+    
+    assert pet.remove_task("t1") is True
+    assert len(pet.tasks) == 1
+    assert pet.tasks[0].id == "t2"
+    
+    assert pet.remove_task("nonexistent") is False
+
+
+def test_pet_edit_task():
+    pet = Pet(id="p1", name="Mochi", species="cat", age=3)
+    t1 = Task(id="t1", description="Feed", duration_min=15, priority="high")
+    
+    pet.add_task(t1)
+    assert pet.edit_task("t1", duration_min=20) is True
+    assert pet.tasks[0].duration_min == 20
+    
+    assert pet.edit_task("nonexistent", duration_min=25) is False
+
+
+def test_pet_get_pending_tasks():
+    pet = Pet(id="p1", name="Mochi", species="cat", age=3)
+    t1 = Task(id="t1", description="Feed", duration_min=15, priority="high")
+    t2 = Task(id="t2", description="Play", duration_min=30, priority="medium")
+    
+    pet.add_task(t1)
+    pet.add_task(t2)
+    
+    pending = pet.get_pending_tasks()
+    assert len(pending) == 2
+    
+    t1.mark_complete()
+    pending = pet.get_pending_tasks()
+    assert len(pending) == 1
+    assert pending[0].id == "t2"
+
+
+def test_pet_get_tasks_by_priority():
+    pet = Pet(id="p1", name="Mochi", species="cat", age=3)
+    t1 = Task(id="t1", description="Feed", duration_min=15, priority="high")
+    t2 = Task(id="t2", description="Play", duration_min=30, priority="low")
+    t3 = Task(id="t3", description="Groom", duration_min=20, priority="medium")
+    
+    pet.add_task(t1)
+    pet.add_task(t2)
+    pet.add_task(t3)
+    
+    prioritized = pet.get_tasks_by_priority()
+    assert len(prioritized) == 3
+    assert prioritized[0].priority == "high"
+    assert prioritized[1].priority == "medium"
+    assert prioritized[2].priority == "low"
 
 if __name__ == "__main__":
     pytest.main(["-q"])
