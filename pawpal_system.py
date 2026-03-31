@@ -27,6 +27,14 @@ class Task:
     frequency: str = "daily"
     constraints: Dict[str, str] = field(default_factory=dict)
     is_complete: bool = False
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.duration_min, int) or isinstance(self.duration_min, bool):
+            raise ValueError("duration_min must be an integer")
+        if self.duration_min <= 0:
+            raise ValueError("duration_min must be greater than zero")
+        if self.priority not in PRIORITY_LEVELS:
+            raise ValueError(f"priority must be one of {list(PRIORITY_LEVELS.keys())}")
     
     def mark_complete(self) -> None:
         """Mark this task as completed."""
