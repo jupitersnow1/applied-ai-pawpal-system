@@ -13,6 +13,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, date, time
 from typing import List, Dict, Optional
 
+PRIORITY_LEVELS = {"low": 1, "medium":2, "high":3}
+
 
 @dataclass
 class Task:
@@ -28,15 +30,24 @@ class Task:
     
     def mark_complete(self) -> None:
         """Mark this task as completed."""
-        pass
+        self.is_complete = True
     
     def priority_score(self) -> float:
         """Calculate a numeric score for prioritization."""
-        pass
+        base = PRIORITY_LEVELS.get(self.priority, 1)
+        return base * 10.0 / self.duration_min
     
     def to_dict(self) -> Dict:
         """Convert task to dictionary format."""
-        pass
+        return{
+            "id" : self.id, 
+            "description": self.description, 
+            "duration_min": self.duration_min, 
+            "priority": self.priority, 
+            "frequency": self.frequency, 
+            "constraints": self.constraints,
+            "is_complete": self.is_complete
+        }
 
 
 @dataclass

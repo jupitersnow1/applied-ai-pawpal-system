@@ -5,12 +5,86 @@
 **a. Initial design**
 
 - Briefly describe your initial UML design.
+
+    I first began with relationship between the entities i identified from the list: Task, Owner, Pet, and Scheduler. I noticed a system:
+
+    ![alt text](image.png)
+
 - What classes did you include, and what responsibilities did you assign to each?
+
+    Classes I included were, Task, Pet, Owner, ScheduleEntry, and Scheduler
+
+    Task:
+    
+    + make id
+    + generate a description
+    + give approx duration time
+    + determine priority
+    + how frequent the task should be done
+    + assign completion status
+
+
+    Pet:
+
+    + make id for pet
+    + receive name
+    + species type
+    + age
+    + tasks (* instance of class above)
+    + preferences
+    + ability to assign more tasks
+    + ability to remove tasks
+    + edit tasks
+    + tasks still pending
+    + list tasks by priority
+
+
+    Owner:
+
+    + has an id
+    + name
+    + availability time (min)
+    + add pets (>=1)
+    + remove pets
+    + retrieve all tasks
+    + total time needed to perform all pending tasks
+
+
+    Scheduler:
+
+    + has an owner
+    + display date
+    + list schedule
+    + ability to build daily plan
+    + explain decisions
+
 
 **b. Design changes**
 
 - Did your design change during implementation?
+
+    Yes
+
 - If yes, describe at least one change and why you made it.
+
+    Initially, the Scheduler handled both planning logic and storing scheduled task details. This made it responsible for too much, so I have implemented ScheduleEntry class
+
+    ScheduleEntry:
+    
+    + Tasks (* instance from the class Task)
+    + Pet (* instance from Pet class)
+    + start date & time
+    + end date & time
+
+    I introduced this class to improve separation of concerns and better encapsulate scheduling data.
+
+    separated concerns:
+
+    * Scheduler focuses on creating the schedule (logic)
+
+    * ScheduleEntry represents individual scheduled items (data)
+
+    This improves modularity and makes the design easier to extend and maintain. In other words, I abstracted the concept of a “scheduled task” into its own class instead of overloading the Scheduler.
 
 ---
 
