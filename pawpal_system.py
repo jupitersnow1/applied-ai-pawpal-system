@@ -20,7 +20,7 @@ VALID_FREQUENCIES = {"daily", "weekly", "once"}
 @dataclass
 class Task:
     """Represents a single pet care activity."""
-    
+
     id: str
     description: str
     duration_min: int
@@ -28,6 +28,7 @@ class Task:
     frequency: str = "daily"
     constraints: Dict[str, str] = field(default_factory=dict)
     is_complete: bool = False
+    last_scheduled: Optional[date] = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.duration_min, int) or isinstance(self.duration_min, bool):
@@ -39,6 +40,20 @@ class Task:
         if self.frequency not in VALID_FREQUENCIES:
             raise ValueError(f"frequency must be one of {list(VALID_FREQUENCIES)}")
     
+    def is_due(self, today: date) -> bool:
+        """Return True if this task should be scheduled on the given date."""
+        if self.is_complete and self.frequency == "once":
+            return False
+        if self.last_scheduled is None:
+            return True
+        if self.frequency == "daily":
+            return self.last_scheduled < today
+        if self.frequency == "weekly":
+            return (today - self.last_scheduled).days >= 7
+        if self.frequency == "once":
+            return not self.is_complete
+        return True
+
     def mark_complete(self) -> None:
         """Mark this task as completed."""
         self.is_complete = True
@@ -136,6 +151,23 @@ class Owner:
         """Calculate total minutes needed for all pending tasks."""
         return sum(t.duration_min for t in self.get_all_tasks())
 
+    def filter_tasks(self, pet_id: str = None, status: str = None) -> List[Task]:
+        """
+        Return tasks filtered by pet and/or completion status.
+
+        Args:
+            pet_id: If provided, only return tasks for that pet.
+            status: "pending" returns incomplete tasks; "complete" returns finished ones.
+                    If omitted, all tasks are returned regardless of status.
+        """
+        pets = [p for p in self.pets if p.id == pet_id] if pet_id else self.pets
+        tasks = [t for p in pets for t in p.tasks]
+        if status == "pending":
+            tasks = [t for t in tasks if not t.is_complete]
+        elif status == "complete":
+            tasks = [t for t in tasks if t.is_complete]
+        return tasks
+
 
 @dataclass
 class ScheduleEntry:
@@ -183,6 +215,7 @@ class Scheduler:
                 pet = self._find_pet_for_task(task)
                 entry = ScheduleEntry(task=task, pet=pet, start=current_dt, end=current_dt + timedelta(minutes=task.duration_min))
                 self.schedule.append(entry)
+                task.last_scheduled = self.date
                 current_dt = entry.end
                 remaining_minutes -= task.duration_min
             else:
@@ -197,8 +230,28 @@ class Scheduler:
         return None
 
     def apply_constraints(self, tasks: List[Task]) -> List[Task]:
-        """Filter tasks based on owner constraints (time, preferences, etc.)."""
-        return [t for t in tasks if t.duration_min <= self.owner.available_time_min and not t.is_complete]
+        """Filter tasks based on owner constraints and recurrence rules."""
+        return [t for t in tasks if t.duration_min <= self.owner.available_time_min and t.is_due(self.date)]
+
+    def detect_conflicts(self) -> List[tuple]:
+        """
+        Return a list of (entry_a, entry_b) pairs whose time windows overlap.
+
+        Under normal scheduling this list is empty, but catches conflicts if
+        entries are added manually or out of order.
+        """
+        conflicts = []
+        entries = self.schedule
+        for i in range(len(entries)):
+            for j in range(i + 1, len(entries)):
+                a, b = entries[i], entries[j]
+                if a.start < b.end and b.start < a.end:
+                    conflicts.append((a, b))
+        return conflicts
+
+    def sort_by_time(self) -> List[ScheduleEntry]:
+        """Return scheduled entries sorted by start time (earliest first)."""
+        return sorted(self.schedule, key=lambda entry: entry.start)
 
     def explain_decision(self) -> str:
         """Generate a human-readable explanation of why tasks were scheduled."""

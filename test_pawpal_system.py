@@ -1,6 +1,6 @@
 import pytest
-from datetime import date, time
-from pawpal_system import Task, Pet, Owner, Scheduler
+from datetime import date, time, timedelta, datetime
+from pawpal_system import Task, Pet, Owner, Scheduler, ScheduleEntry
 
 
 def test_task_methods():
@@ -227,6 +227,169 @@ def test_scheduler_build_daily_plan():
     assert "Included tasks:" in explanation
     assert "Overflow tasks:" in explanation
     assert "Reasoning:" in explanation
+
+
+def make_scheduler(available_time=120):
+    """Helper to build a scheduler with two pets and three tasks."""
+    owner = Owner(id="o1", name="Jordan", available_time_min=available_time)
+    pet1 = Pet(id="p1", name="Buddy", species="dog", age=3)
+    pet2 = Pet(id="p2", name="Whiskers", species="cat", age=2)
+    t1 = Task(id="t1", description="Morning walk", duration_min=30, priority="high")
+    t2 = Task(id="t2", description="Feed breakfast", duration_min=15, priority="medium")
+    t3 = Task(id="t3", description="Playtime", duration_min=45, priority="low")
+    pet1.add_task(t1)
+    pet1.add_task(t2)
+    pet2.add_task(t3)
+    owner.add_pet(pet1)
+    owner.add_pet(pet2)
+    scheduler = Scheduler(owner=owner, date=date(2026, 3, 31))
+    scheduler.build_daily_plan(start_time=time(8, 0))
+    return scheduler, owner, pet1, pet2, t1, t2, t3
+
+
+# --- sort_by_time ---
+
+def test_sort_by_time_returns_ascending_order():
+    scheduler, *_ = make_scheduler()
+    sorted_entries = scheduler.sort_by_time()
+    starts = [e.start for e in sorted_entries]
+    assert starts == sorted(starts)
+
+
+def test_sort_by_time_empty_schedule():
+    owner = Owner(id="o1", name="Jordan", available_time_min=60)
+    scheduler = Scheduler(owner=owner, date=date(2026, 3, 31))
+    assert scheduler.sort_by_time() == []
+
+
+# --- filter_tasks ---
+
+def test_filter_tasks_by_pet():
+    _, owner, pet1, _, t1, t2, t3 = make_scheduler()
+    result = owner.filter_tasks(pet_id="p1")
+    assert all(t in result for t in [t1, t2])
+    assert t3 not in result
+
+
+def test_filter_tasks_by_status_pending():
+    _, owner, _, _, t1, t2, t3 = make_scheduler()
+    t1.mark_complete()
+    pending = owner.filter_tasks(status="pending")
+    assert t1 not in pending
+    assert t2 in pending
+    assert t3 in pending
+
+
+def test_filter_tasks_by_status_complete():
+    _, owner, _, _, t1, t2, _ = make_scheduler()
+    t1.mark_complete()
+    complete = owner.filter_tasks(status="complete")
+    assert t1 in complete
+    assert t2 not in complete
+
+
+def test_filter_tasks_combined_pet_and_status():
+    _, owner, _, _, t1, t2, _ = make_scheduler()
+    t1.mark_complete()
+    result = owner.filter_tasks(pet_id="p1", status="pending")
+    assert result == [t2]
+
+
+def test_filter_tasks_no_filters_returns_all():
+    _, owner, _, _, t1, t2, t3 = make_scheduler()
+    result = owner.filter_tasks()
+    assert len(result) == 3
+    assert t1 in result
+    assert t2 in result
+    assert t3 in result
+
+
+# --- is_due (recurring task gating) ---
+
+def test_is_due_daily_not_yet_scheduled():
+    t = Task(id="t1", description="Walk", duration_min=20, priority="low", frequency="daily")
+    assert t.is_due(date.today()) is True
+
+
+def test_is_due_daily_already_scheduled_today():
+    t = Task(id="t1", description="Walk", duration_min=20, priority="low", frequency="daily",
+             last_scheduled=date.today())
+    assert t.is_due(date.today()) is False
+
+
+def test_is_due_weekly_not_yet_due():
+    t = Task(id="t1", description="Bath", duration_min=20, priority="low", frequency="weekly",
+             last_scheduled=date.today() - timedelta(days=3))
+    assert t.is_due(date.today()) is False
+
+
+def test_is_due_weekly_now_due():
+    t = Task(id="t1", description="Bath", duration_min=20, priority="low", frequency="weekly",
+             last_scheduled=date.today() - timedelta(days=7))
+    assert t.is_due(date.today()) is True
+
+
+def test_is_due_once_not_complete():
+    t = Task(id="t1", description="Vet", duration_min=60, priority="high", frequency="once")
+    assert t.is_due(date.today()) is True
+
+
+def test_is_due_once_already_complete():
+    t = Task(id="t1", description="Vet", duration_min=60, priority="high", frequency="once")
+    t.mark_complete()
+    assert t.is_due(date.today()) is False
+
+
+def test_weekly_task_excluded_from_schedule_when_not_due():
+    owner = Owner(id="o1", name="Jordan", available_time_min=120)
+    pet = Pet(id="p1", name="Buddy", species="dog", age=3)
+    weekly_task = Task(id="t1", description="Bath", duration_min=20, priority="high", frequency="weekly",
+                       last_scheduled=date.today() - timedelta(days=3))
+    pet.add_task(weekly_task)
+    owner.add_pet(pet)
+    scheduler = Scheduler(owner=owner, date=date.today())
+    scheduler.build_daily_plan()
+    assert len(scheduler.schedule) == 0
+
+
+# --- detect_conflicts ---
+
+def test_detect_conflicts_none_in_normal_schedule():
+    scheduler, *_ = make_scheduler()
+    assert scheduler.detect_conflicts() == []
+
+
+def test_detect_conflicts_catches_overlap():
+    scheduler, _, pet1, *_ = make_scheduler()
+    # inject an entry that overlaps the first scheduled entry
+    first = scheduler.schedule[0]
+    overlap_task = Task(id="overlap", description="Overlap", duration_min=10, priority="low")
+    overlap_entry = ScheduleEntry(
+        task=overlap_task, pet=pet1,
+        start=first.start,
+        end=first.start + timedelta(minutes=10)
+    )
+    scheduler.schedule.append(overlap_entry)
+    conflicts = scheduler.detect_conflicts()
+    assert len(conflicts) == 1
+    tasks_in_conflict = {conflicts[0][0].task.id, conflicts[0][1].task.id}
+    assert "overlap" in tasks_in_conflict
+
+
+def test_detect_conflicts_adjacent_entries_do_not_conflict():
+    scheduler, _, pet1, *_ = make_scheduler()
+    # build two back-to-back entries with no gap — should not conflict
+    start_a = datetime(2026, 3, 31, 8, 0)
+    end_a = datetime(2026, 3, 31, 8, 30)
+    start_b = end_a  # starts exactly when a ends
+    end_b = datetime(2026, 3, 31, 9, 0)
+    t_a = Task(id="a", description="A", duration_min=30, priority="low")
+    t_b = Task(id="b", description="B", duration_min=30, priority="low")
+    scheduler.schedule = [
+        ScheduleEntry(task=t_a, pet=pet1, start=start_a, end=end_a),
+        ScheduleEntry(task=t_b, pet=pet1, start=start_b, end=end_b),
+    ]
+    assert scheduler.detect_conflicts() == []
 
 
 if __name__ == "__main__":
