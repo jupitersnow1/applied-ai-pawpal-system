@@ -95,6 +95,10 @@
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+    The scheduler considers three main constraints: available time (the owner's daily time budget in minutes), task priority (high/medium/low), and recurrence (daily/weekly/once via `is_due()`).
+
+    Priority felt like the most important one to get right first — if you only have 30 minutes and have both a vet appointment and a playtime session, the vet should always win. Time budget came second because no matter how important a task is, if it physically doesn't fit, it can't run. Recurrence came last in the build order but ended up being one of the more interesting ones to implement, since it required tracking state across runs.
+
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
@@ -115,10 +119,16 @@ That said, the tradeoff is fine here. A typical pet owner will only have around 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
 - What kinds of prompts or questions were most helpful?
 
+    I used AI tools sparingly and mainly as a support resource when I needed a second perspective. Most of my work—like designing the overall class structure and implementing core functionality—was done independently. Where AI was most helpful was in refining specific pieces, such as thinking through edge cases I might have overlooked (for example, handling situations where a pet has no tasks or when all tasks exceed the available time). I also occasionally used it to sanity-check my approach or compare alternative implementations, especially when deciding between different ways to structure logic.
+
+    The most useful prompts were the ones where I included context about my goal and constraints, rather than just asking for direct solutions. For instance, instead of asking for a function outright, I would ask about different approaches to solving a problem and the tradeoffs between them. That helped me better understand why one approach might be preferable over another, and then I could adapt that reasoning into my own implementation.
+
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
 - How did you evaluate or verify what the AI suggested?
+
+    One moment was when AI suggested replacing the nested loop in detect_conflicts with an itertools.combinations version shorter, more "Pythonic." I looked at both, ran the tests to confirm they produced the same results, and decided to keep the original. The nested loop makes the pairwise comparison obvious just by reading it, and since this app isn't handling hundreds of tasks, there was no real performance reason to trade readability for cleverness. That felt like my call to make, not AI's.
 
 ---
 
@@ -132,8 +142,12 @@ That said, the tradeoff is fine here. A typical pet owner will only have around 
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
+
+    4/5. The backend logic is well covered. 
+    
 - What edge cases would you test next if you had more time?
 
+    What I'd test next with more time is the Streamlit UI interactions and per-day availability, which is a feature I plan to add after this submission.
 ---
 
 ## 5. Reflection
@@ -142,10 +156,16 @@ That said, the tradeoff is fine here. A typical pet owner will only have around 
 
 - What part of this project are you most satisfied with?
 
+    The backend ended up being cleaner than I expected. The separation between Scheduler (logic) and ScheduleEntry (data) made everything easier to extend as new features came in.
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
 
+    I'd add per-day availability — right now the owner gets one flat time budget for every day, which isn't realistic. Monday and Saturday look very different for most people.
+
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+    AI is a fast collaborator but a bad architect. It'll give you working code quickly, but if you don't understand the design, you end up with a system you can't explain or extend. The most useful thing I learned is that the clearer your question, the better the answer — and you still have to be the one deciding what's right.

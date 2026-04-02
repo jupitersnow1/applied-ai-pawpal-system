@@ -22,6 +22,32 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Features
+
+- **Pet & Owner Management** — Add multiple pets with name, species, and age. Set your daily available time in hours and minutes.
+- **Task Scheduling** — Add tasks with a title, duration, priority (low/medium/high), and frequency (daily/weekly/once). Tasks are automatically assigned to the selected pet.
+- **Priority-Based Planning** — The scheduler sorts tasks by priority (high first) and fits as many as possible within your available time budget.
+- **Sorting by Time** — The generated schedule is displayed in chronological order using `sort_by_time()`.
+- **Task Filtering** — Filter tasks by pet or completion status (pending/complete) using `filter_tasks()`.
+- **Daily Recurrence** — Daily and weekly tasks are automatically re-queued after completion. One-time tasks (`once`) are never repeated.
+- **Conflict Warnings** — If two tasks overlap in time, the app surfaces a visible warning using `warn_conflicts()` rather than crashing.
+- **Overflow Handling** — Tasks that don't fit within your available time are listed separately in a "Could Not Fit" section.
+
+## Demo
+
+### Owner & Pet Setup
+![PawPal+ Demo1](demo_screenshots/owner_pet_setup.png)
+
+### Tasks Section
+![Tasks Section](demo_screenshots/tasks_section.png)
+
+### Build Schedule
+![Build Schedule Section](demo_screenshots/build_schedule.png)
+
+### Per-Pet Summary & Overflow
+![Per Pet summary and overflowing Tasks](demo_screenshots/per_pet_summary.png)
+
+
 ## Smarter Scheduling
 
 Phase 4 added algorithmic intelligence to the scheduler. The following features are implemented in `pawpal_system.py` and verified by tests in `test_pawpal_system.py`:

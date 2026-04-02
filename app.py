@@ -83,44 +83,76 @@ else:
 st.divider()
 
 st.subheader("Build Schedule")
+if "scheduler_result" not in st.session_state:
+    st.session_state.scheduler_result = None
+
 if st.button("Generate schedule", key="generate_schedule"):
-    owner = Owner(id="owner1", name=owner_name, available_time_min=available_time)
+    if not st.session_state.pets:
+        st.error("Add at least one pet before generating a schedule.")
+    elif available_time == 0:
+        st.error("Set your available time before generating a schedule.")
+    else:
+        owner = Owner(id="owner1", name=owner_name, available_time_min=available_time)
+        for pet_obj in st.session_state.pets:
+            owner.add_pet(pet_obj)
 
-    # Use the Pet objects already built in session state (tasks are already attached)
-    for pet_obj in st.session_state.pets:
-        owner.add_pet(pet_obj)
+        scheduler = Scheduler(owner=owner, date=date.today())
+        scheduler.build_daily_plan()
+        st.session_state.scheduler_result = scheduler
+        st.session_state.schedule_owner = owner
+        st.success("Schedule generated!")
 
-    # Create Scheduler and build plan
-    scheduler = Scheduler(owner=owner, date=date.today())
-    scheduler.build_daily_plan()
-    
-    # Format output
-    output = f"Today's Schedule for Owner: {owner.name}\n\n"
+if st.session_state.scheduler_result:
+    scheduler = st.session_state.scheduler_result
+    owner = st.session_state.schedule_owner
+
+    # Conflict warnings
+    conflicts = scheduler.warn_conflicts()
+    if conflicts:
+        for warning in conflicts:
+            st.warning(warning)
+
+    # Sorted timeline table
+    st.subheader("Today's Timeline")
+    sorted_entries = scheduler.sort_by_time()
+    if sorted_entries:
+        st.table([
+            {
+                "Start": e.start.strftime("%H:%M"),
+                "End": e.end.strftime("%H:%M"),
+                "Pet": e.pet.name,
+                "Task": e.task.description,
+                "Priority": e.task.priority,
+                "Frequency": e.task.frequency,
+            }
+            for e in sorted_entries
+        ])
+    else:
+        st.info("No tasks were scheduled. Check that your tasks fit within your available time.")
+
+    # Per-pet breakdown
+    st.subheader("Per-Pet Summary")
     for p in owner.pets:
-        output += f"Pet: {p.name} ({p.species})\n"
-        pet_tasks = [entry for entry in scheduler.schedule if entry.pet == p]
-        if pet_tasks:
-            for entry in pet_tasks:
-                duration_min = entry.task.duration_min
-                duration_str = f"{duration_min // 60} hour{'s' if duration_min // 60 > 1 else ''}" if duration_min % 60 == 0 and duration_min > 0 else f"{duration_min} min"
-                output += (
-                    f"  - {entry.task.description} ({entry.task.priority}, {duration_str}, "
-                    f"{entry.start.strftime('%H:%M')} - {entry.end.strftime('%H:%M')})\n"
-                )
+        pet_entries = [e for e in sorted_entries if e.pet == p]
+        if pet_entries:
+            st.markdown(f"**{p.name}** ({p.species})")
+            for e in pet_entries:
+                st.markdown(f"- {e.start.strftime('%H:%M')}–{e.end.strftime('%H:%M')} · {e.task.description} ({e.task.priority})")
         else:
-            output += "  - No tasks scheduled\n"
-    
-    if scheduler.overflow_tasks:
-        output += "\nOverflow tasks:\n"
-        for task in scheduler.overflow_tasks:
-            duration_min = task.duration_min
-            duration_str = f"{duration_min // 60} hour{'s' if duration_min // 60 > 1 else ''}" if duration_min % 60 == 0 and duration_min > 0 else f"{duration_min} min"
-            output += f"  - {task.description} ({task.priority}, {duration_str})\n"
-    
-    st.session_state.schedule_output = output
-    st.success("Schedule generated!")
+            st.markdown(f"**{p.name}** — no tasks scheduled today")
 
-if st.session_state.schedule_output:
-    st.subheader("Generated Schedule")
-    st.code(st.session_state.schedule_output, language="text")
+    # Overflow tasks
+    if scheduler.overflow_tasks:
+        st.subheader("Could Not Fit")
+        st.warning(
+            f"{len(scheduler.overflow_tasks)} task(s) could not be scheduled within your available time:"
+        )
+        st.table([
+            {
+                "Task": t.description,
+                "Duration (min)": t.duration_min,
+                "Priority": t.priority,
+            }
+            for t in scheduler.overflow_tasks
+        ])
 
