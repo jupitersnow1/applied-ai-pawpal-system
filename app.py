@@ -1,5 +1,6 @@
 import streamlit as st
 from pawpal_system import Owner, Pet, Task, Scheduler
+from persistence import save_pets, load_pets
 from datetime import date
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
@@ -18,6 +19,10 @@ if "owner" not in st.session_state:
 if "schedule_output" not in st.session_state:
     st.session_state.schedule_output = ""
 
+# Auto-load saved pets on first run
+if "pets" not in st.session_state:
+    st.session_state.pets = load_pets()
+
 st.subheader("Owner Setup")
 owner_name = st.text_input("Owner name", value="Jordan", key="owner_name")
 col1, col2 = st.columns(2)
@@ -31,8 +36,6 @@ if available_time == 0:
     st.warning("Available time is zero; please select at least 5 minutes")
 
 st.subheader("Pet Setup")
-if "pets" not in st.session_state:
-    st.session_state.pets = []
 
 pet_name = st.text_input("Pet name", value="Mochi", key="pet_name")
 species = st.selectbox("Species", ["dog", "cat", "other"], key="species")
@@ -79,6 +82,12 @@ if all_tasks:
     st.table(all_tasks)
 else:
     st.info("No tasks yet. Add one above.")
+
+st.divider()
+
+if st.button("Save my pets & tasks", key="save_data"):
+    save_pets(st.session_state.pets)
+    st.success("Saved! Your pets and tasks will be here next time you open the app.")
 
 st.divider()
 
