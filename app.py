@@ -1,4 +1,5 @@
 import streamlit as st
+from ai_parser import parse_task_from_text
 from pawpal_system import Owner, Pet, Task, Scheduler
 from persistence import save_pets, load_pets
 from datetime import date
@@ -24,7 +25,7 @@ if "pets" not in st.session_state:
     st.session_state.pets = load_pets()
 
 st.subheader("Owner Setup")
-owner_name = st.text_input("Owner name", value="Jordan", key="owner_name")
+owner_name = st.text_input("Owner name", placeholder= "Enter your name", key="owner_name")
 col1, col2 = st.columns(2)
 with col1:
     available_hours = st.number_input("Available hours", min_value=0, max_value=24, value=2, step=1, key="available_hours")
@@ -37,14 +38,19 @@ if available_time == 0:
 
 st.subheader("Pet Setup")
 
-pet_name = st.text_input("Pet name", value="Mochi", key="pet_name")
-species = st.selectbox("Species", ["dog", "cat", "other"], key="species")
-age = st.number_input("Age", min_value=1, max_value=30, value=3, key="age")
+pet_name = st.text_input("Pet name", placeholder= "Enter your pet's name", key="pet_name")
+species = st.selectbox("Species", ["-- select species--","dog", "cat", "other"], key="species")
+age = st.number_input("Age", min_value=1, max_value=30, value=1, key="age")
 
 if st.button("Add pet", key="add_pet"):
-    pet_id = f"pet{len(st.session_state.pets)+1}"
-    new_pet = Pet(id=pet_id, name=pet_name, species=species, age=age)
-    st.session_state.pets.append(new_pet)
+    if species == "-- select species--":
+        st.error("Please select a species")
+    elif not pet_name.strip():
+        st.error("Please enter your pet's name")
+    else:
+        pet_id = f"pet{len(st.session_state.pets)+1}"
+        new_pet = Pet(id=pet_id, name=pet_name, species=species, age=age)
+        st.session_state.pets.append(new_pet)
 
 if st.session_state.pets:
     st.write("Current pets:")
@@ -54,6 +60,33 @@ if st.session_state.pets:
 else:
     st.info("Add at least one pet first.")
     selected_pet_id = None
+
+st.subheader("Add Task with AI")
+nl_input = st.text_input("Describe a task in plain English", 
+    placeholder='e.g. "Walk Buddy for 30 minutes every morning, high priority"',
+    key="nl_input")
+
+if st.button("Parse & Add Task", key="nl_add_task"):
+    if not selected_pet_id:
+        st.error("Select a pet first.")
+    elif not nl_input.strip():
+        st.error("Please enter a task description.")
+    else:
+        try:
+            target_pet = next((p for p in st.session_state.pets if p.id == selected_pet_id), None)
+            parsed = parse_task_from_text(nl_input)
+            task_id = f"task{sum(len(p.tasks) for p in st.session_state.pets) + 1}"
+            new_task = Task(
+                id=task_id,
+                description=parsed["description"],
+                duration_min=parsed["duration_min"],
+                priority=parsed["priority"],
+                frequency=parsed["frequency"]
+            )
+            target_pet.add_task(new_task)
+            st.success(f"Added: '{parsed['description']}' — {parsed['duration_min']} min, {parsed['priority']} priority, {parsed['frequency']}")
+        except Exception as e:
+            st.error(f"Could not parse task: {e}")
 
 st.subheader("Tasks")
 col1, col2, col3, col4 = st.columns(4)

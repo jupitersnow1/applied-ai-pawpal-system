@@ -553,5 +553,73 @@ def test_complete_task_no_duplicate_on_rerun():
     assert len(pet.tasks) == 2 # still only one next occurrence, no duplicate
 
 
+# --- ai_parser tests (mocked — no real API calls) ---
+
+from unittest.mock import MagicMock, patch
+
+
+def make_mock_response(json_text: str):
+    """Helper to build a fake Claude API response."""
+    mock_content = MagicMock()
+    mock_content.text = json_text
+    mock_response = MagicMock()
+    mock_response.content = [mock_content]
+    return mock_response
+
+
+@patch("ai_parser.client")
+def test_parse_task_returns_correct_keys(mock_client):
+    mock_client.messages.create.return_value = make_mock_response(
+        '{"description": "Feed Mochi", "duration_min": 15, "priority": "high", "frequency": "daily"}'
+    )
+    from ai_parser import parse_task_from_text
+    result = parse_task_from_text("Feed my cat Mochi every morning, high priority, 15 minutes")
+    assert "description" in result
+    assert "duration_min" in result
+    assert "priority" in result
+    assert "frequency" in result
+
+
+@patch("ai_parser.client")
+def test_parse_task_valid_priority(mock_client):
+    mock_client.messages.create.return_value = make_mock_response(
+        '{"description": "Morning walk", "duration_min": 30, "priority": "high", "frequency": "daily"}'
+    )
+    from ai_parser import parse_task_from_text
+    result = parse_task_from_text("Walk Buddy for 30 minutes every morning")
+    assert result["priority"] in {"low", "medium", "high"}
+
+
+@patch("ai_parser.client")
+def test_parse_task_valid_frequency(mock_client):
+    mock_client.messages.create.return_value = make_mock_response(
+        '{"description": "Bath time", "duration_min": 20, "priority": "medium", "frequency": "weekly"}'
+    )
+    from ai_parser import parse_task_from_text
+    result = parse_task_from_text("Give Buddy a bath once a week")
+    assert result["frequency"] in {"daily", "weekly", "once"}
+
+
+@patch("ai_parser.client")
+def test_parse_task_duration_is_positive_int(mock_client):
+    mock_client.messages.create.return_value = make_mock_response(
+        '{"description": "Vet visit", "duration_min": 60, "priority": "high", "frequency": "once"}'
+    )
+    from ai_parser import parse_task_from_text
+    result = parse_task_from_text("Take Mochi to the vet")
+    assert isinstance(result["duration_min"], int)
+    assert result["duration_min"] > 0
+
+
+@patch("ai_parser.client")
+def test_parse_task_handles_markdown_fences(mock_client):
+    mock_client.messages.create.return_value = make_mock_response(
+        '```json\n{"description": "Play time", "duration_min": 20, "priority": "low", "frequency": "daily"}\n```'
+    )
+    from ai_parser import parse_task_from_text
+    result = parse_task_from_text("Play with Mochi for 20 minutes daily")
+    assert result["description"] == "Play time"
+
+
 if __name__ == "__main__":
     pytest.main(["-q"])
