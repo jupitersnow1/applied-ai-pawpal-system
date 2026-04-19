@@ -8,7 +8,7 @@
 
     I first began with relationship between the entities i identified from the list: Task, Owner, Pet, and Scheduler. I noticed a system:
 
-    ![alt text](image.png)
+    ![alt text](assets/image.png)
 
 - What classes did you include, and what responsibilities did you assign to each?
 

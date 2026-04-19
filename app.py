@@ -1,5 +1,6 @@
 import streamlit as st
 from ai_parser import parse_task_from_text
+from schedule_critic import critique_schedule
 from pawpal_system import Owner, Pet, Task, Scheduler
 from persistence import save_pets, load_pets
 from datetime import date
@@ -197,4 +198,21 @@ if st.session_state.scheduler_result:
             }
             for t in scheduler.overflow_tasks
         ])
+
+    st.divider()
+    st.subheader("AI Schedule Critique")
+    st.caption("Claude reviews your plan pet by pet and flags anything worth knowing.")
+
+    if "critique_output" not in st.session_state:
+        st.session_state.critique_output = None
+
+    if st.button("Analyze my schedule", key="run_critic"):
+        with st.spinner("Claude is reviewing your schedule..."):
+            try:
+                st.session_state.critique_output = critique_schedule(scheduler, owner)
+            except Exception as e:
+                st.error(f"Could not generate critique: {e}")
+
+    if st.session_state.critique_output:
+        st.markdown(st.session_state.critique_output)
 
