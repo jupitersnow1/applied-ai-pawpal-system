@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import streamlit as st
 from ai_parser import parse_task_from_text
 from schedule_critic import critique_schedule
@@ -74,18 +77,31 @@ if st.button("Parse & Add Task", key="nl_add_task"):
         st.error("Please enter a task description.")
     else:
         try:
-            target_pet = next((p for p in st.session_state.pets if p.id == selected_pet_id), None)
-            parsed = parse_task_from_text(nl_input)
-            task_id = f"task{sum(len(p.tasks) for p in st.session_state.pets) + 1}"
-            new_task = Task(
-                id=task_id,
-                description=parsed["description"],
-                duration_min=parsed["duration_min"],
-                priority=parsed["priority"],
-                frequency=parsed["frequency"]
-            )
-            target_pet.add_task(new_task)
-            st.success(f"Added: '{parsed['description']}' — {parsed['duration_min']} min, {parsed['priority']} priority, {parsed['frequency']}")
+            fallback_pet = next((p for p in st.session_state.pets if p.id == selected_pet_id), None)
+            parsed_tasks = parse_task_from_text(nl_input)
+            for parsed in parsed_tasks:
+                mentioned_name = parsed.get("mentioned_name")
+                if mentioned_name:
+                    matched_pet = next(
+                        (p for p in st.session_state.pets if p.name.lower() == mentioned_name.lower()),
+                        None,
+                    )
+                    if matched_pet is None:
+                        st.warning(f"'{mentioned_name}' isn't in your pet list — skipped '{parsed['description']}'. Add {mentioned_name} in Pet Setup first.")
+                        continue
+                else:
+                    matched_pet = fallback_pet
+
+                task_id = f"task{sum(len(p.tasks) for p in st.session_state.pets) + 1}"
+                new_task = Task(
+                    id=task_id,
+                    description=parsed["description"],
+                    duration_min=parsed["duration_min"],
+                    priority=parsed["priority"],
+                    frequency=parsed["frequency"],
+                )
+                matched_pet.add_task(new_task)
+                st.toast(f"Added to {matched_pet.name}: '{parsed['description']}' — {parsed['duration_min']} min, {parsed['priority']}", icon="✅")
         except Exception as e:
             st.error(f"Could not parse task: {e}")
 

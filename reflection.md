@@ -130,6 +130,14 @@ That said, the tradeoff is fine here. A typical pet owner will only have around 
 
     One moment was when AI suggested replacing the nested loop in detect_conflicts with an itertools.combinations version shorter, more "Pythonic." I looked at both, ran the tests to confirm they produced the same results, and decided to keep the original. The nested loop makes the pairwise comparison obvious just by reading it, and since this app isn't handling hundreds of tasks, there was no real performance reason to trade readability for cleverness. That felt like my call to make, not AI's.
 
+**c. Pet Name Matching — Knowing When Not to Use AI**
+
+    During testing I noticed the parser was inconsistently attributing tasks to pets — returning null for registered pets like Rocky even when the name was clearly in the input. The design was already broken into steps, but the issue was that pet name extraction and list matching were both happening inside the same model call, and Haiku wasn't reliable enough for the matching part.
+
+    The fix was an architectural one: Claude stays responsible for reading the natural language and extracting the name as written, and I did the matching against the registered pet list. That's a loop, not a language problem. Once I separated the two responsibilities the behavior became consistent and predictable.
+
+    What I took away is that testing reveals where AI is actually reliable in your pipeline versus where it's just adding noise. The programmer still has to be the one to notice that distinction and reorganize accordingly — Claude won't flag its own inconsistencies.
+
 ---
 
 ## 4. Testing and Verification
