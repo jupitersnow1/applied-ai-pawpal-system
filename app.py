@@ -42,9 +42,15 @@ if available_time == 0:
 
 st.subheader("Pet Setup")
 
-pet_name = st.text_input("Pet name", placeholder= "Enter your pet's name", key="pet_name")
-species = st.selectbox("Species", ["-- select species--","dog", "cat", "other"], key="species")
-age = st.number_input("Age", min_value=1, max_value=30, value=1, key="age")
+pet_name = st.text_input("Pet name", placeholder="Enter your pet's name", key="pet_name")
+species = st.selectbox("Species", ["-- select species--", "dog", "cat", "other"], key="species")
+age_col, unit_col, sex_col = st.columns([1, 1, 1])
+with age_col:
+    age = st.number_input("Age", min_value=0, max_value=30, value=1, key="age")
+with unit_col:
+    age_unit = st.selectbox("Unit", ["years", "months"], key="age_unit")
+with sex_col:
+    sex = st.selectbox("Sex", ["unknown", "male", "female"], key="sex")
 
 if st.button("Add pet", key="add_pet"):
     if species == "-- select species--":
@@ -53,12 +59,19 @@ if st.button("Add pet", key="add_pet"):
         st.error("Please enter your pet's name")
     else:
         pet_id = f"pet{len(st.session_state.pets)+1}"
-        new_pet = Pet(id=pet_id, name=pet_name, species=species, age=age)
+        new_pet = Pet(id=pet_id, name=pet_name, species=species, age=age,
+                      preferences={"age_unit": age_unit, "sex": sex})
         st.session_state.pets.append(new_pet)
 
 if st.session_state.pets:
     st.write("Current pets:")
-    st.table([{"id": p.id, "name": p.name, "species": p.species, "age": p.age} for p in st.session_state.pets])
+    st.table([{
+        "id": p.id,
+        "name": p.name,
+        "species": p.species,
+        "age": f"{p.age} {p.preferences.get('age_unit', 'years')}",
+        "sex": p.preferences.get("sex", "unknown"),
+    } for p in st.session_state.pets])
     selected_pet = st.selectbox("Assign task to pet", [p.id + ": " + p.name for p in st.session_state.pets], key="selected_pet")
     selected_pet_id = selected_pet.split(":")[0]
 else:
@@ -78,7 +91,7 @@ if st.button("Parse & Add Task", key="nl_add_task"):
     else:
         try:
             fallback_pet = next((p for p in st.session_state.pets if p.id == selected_pet_id), None)
-            parsed_tasks = parse_task_from_text(nl_input)
+            parsed_tasks = parse_task_from_text(nl_input, pets=st.session_state.pets)
             for parsed in parsed_tasks:
                 mentioned_name = parsed.get("mentioned_name")
                 if mentioned_name:
@@ -130,6 +143,18 @@ all_tasks = [{"pet": p.name, "task": t.description, "duration_min": t.duration_m
 if all_tasks:
     st.write("Current tasks:")
     st.table(all_tasks)
+
+    st.write("Remove a task:")
+    task_options = {
+        f"{p.name} — {t.description} ({t.priority}, {t.duration_min} min)": (p, t)
+        for p in st.session_state.pets for t in p.tasks
+    }
+    selected_task_label = st.selectbox("Select task to remove", list(task_options.keys()), key="remove_task_select")
+    if st.button("Remove task", key="remove_task_btn"):
+        pet_to_edit, task_to_remove = task_options[selected_task_label]
+        pet_to_edit.remove_task(task_to_remove.id)
+        st.toast(f"Removed '{task_to_remove.description}' from {pet_to_edit.name}", icon="🗑️")
+        st.rerun()
 else:
     st.info("No tasks yet. Add one above.")
 

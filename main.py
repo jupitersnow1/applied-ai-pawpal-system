@@ -41,7 +41,7 @@ def parse_and_assign(prompt: str, label: str, pets: list) -> None:
     print(f"  [{label}]")
     print(f"  Input: \"{prompt}\"")
     try:
-        parsed_tasks = parse_task_from_text(prompt)
+        parsed_tasks = parse_task_from_text(prompt, pets=pets)
         for parsed in parsed_tasks:
             mentioned = parsed.get("mentioned_name")
             if mentioned:

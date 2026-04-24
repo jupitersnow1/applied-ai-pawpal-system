@@ -59,9 +59,23 @@ def _validate_task(raw: dict) -> dict:
     }
 
 
-def parse_task_from_text(user_input: str) -> list[dict]:
+def _build_pet_context(pets: list) -> str:
+    """Format a registered pet list for inclusion in the parser prompt."""
+    lines = []
+    for p in pets:
+        age_unit = p.preferences.get("age_unit", "years")
+        sex = p.preferences.get("sex", "unknown")
+        sex_part = f", {sex}" if sex != "unknown" else ""
+        lines.append(f"- {p.name} ({p.species}, {p.age} {age_unit} old{sex_part})")
+    return "\n".join(lines)
+
+
+def parse_task_from_text(user_input: str, pets: list | None = None) -> list[dict]:
     """
     Parse one or more pet care tasks from a natural language description.
+
+    pets: optional list of Pet objects. When provided, Claude can resolve
+    descriptors like "the dog", "puppy", or "him" to the correct registered name.
 
     Returns a list of validated task dicts, each with:
         description, duration_min, priority, frequency, mentioned_name.
@@ -69,8 +83,21 @@ def parse_task_from_text(user_input: str) -> list[dict]:
     """
     log.info("Parsing input: %s", user_input[:120])
 
-    prompt = f"""You are a helpful assistant for a pet care scheduling app.
+    pet_context_block = ""
+    if pets:
+        pet_context_block = f"""
+Registered pets in this owner's account:
+{_build_pet_context(pets)}
 
+When a descriptor like "the dog", "puppy", "kitten", "the cat", "him", "her", or "he"/"she"
+is used and exactly one registered pet matches that description, set mentioned_name to that
+pet's exact registered name. Use sex to resolve "him"/"his"/"he" (male) and "her"/"she" (female).
+Use age to resolve "puppy" (dog under 1 year) or "kitten" (cat under 1 year).
+If the descriptor is ambiguous (matches multiple pets), set mentioned_name to null.
+"""
+
+    prompt = f"""You are a helpful assistant for a pet care scheduling app.
+{pet_context_block}
 Parse the following natural language description into a JSON array of task objects.
 - If multiple tasks are described, return one object per task.
 - If only one task is described, return an array with a single object.
@@ -80,7 +107,7 @@ Each object must have exactly these fields:
 - "duration_min": an integer number of minutes (default 15 if not mentioned)
 - "priority": one of exactly "low", "medium", or "high" (default "medium")
 - "frequency": one of exactly "daily", "weekly", or "once" (default "daily")
-- "mentioned_name": the exact pet name as written in the input text, or null if no pet name was mentioned
+- "mentioned_name": the exact registered pet name, or null if no pet was mentioned or the reference is ambiguous
 
 Respond with ONLY a valid JSON array — no explanation, no markdown, no extra text.
 
