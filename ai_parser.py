@@ -107,7 +107,7 @@ Each object must have exactly these fields:
 - "duration_min": an integer number of minutes (default 15 if not mentioned)
 - "priority": one of exactly "low", "medium", or "high" (default "medium")
 - "frequency": one of exactly "daily", "weekly", or "once" (default "daily")
-- "mentioned_name": the exact registered pet name, or null if no pet was mentioned or the reference is ambiguous
+- "mentioned_name": if an explicit pet name is written in the text, return it exactly as written (even if it is not in the registered list); if a descriptor like "the dog", "puppy", or "her" is used, resolve it to the matching registered pet's exact name if unambiguous; return null only if no pet is mentioned at all or a descriptor matches multiple pets
 
 Respond with ONLY a valid JSON array — no explanation, no markdown, no extra text.
 
